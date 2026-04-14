@@ -121,6 +121,12 @@ export class User {
   lastLogin: Date;
 
   @Prop()
+  resetPasswordToken: string;
+
+  @Prop()
+  resetPasswordExpires: Date;
+
+  @Prop()
   createdBy: string;
 
   @Prop()

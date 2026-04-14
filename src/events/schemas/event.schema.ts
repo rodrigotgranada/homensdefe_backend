@@ -5,7 +5,7 @@ export type EventDocument = Event & Document;
 
 @Schema({ timestamps: true })
 export class Event {
-  @Prop({ type: Types.ObjectId, ref: 'City', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'City', default: null })
   cityRef: Types.ObjectId;
 
   @Prop({ required: true })

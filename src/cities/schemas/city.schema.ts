@@ -19,8 +19,14 @@ export class City {
   @Prop({ enum: CityStatus, default: CityStatus.PENDING })
   status: CityStatus;
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  adminLocalRef: Types.ObjectId;
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
+  adminLocalRefs: Types.ObjectId[];
+
+  @Prop({ required: true, unique: true })
+  slug: string;
+
+  @Prop()
+  quemSomosLocal: string;
 
   @Prop()
   createdBy: string;
