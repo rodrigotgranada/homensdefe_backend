@@ -57,4 +57,11 @@ export class UsersService {
       resetPasswordExpires: null,
     });
   }
+
+  async update(userId: string, data: any): Promise<UserDocument | null> {
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+    return this.userModel.findByIdAndUpdate(userId, data, { new: true }).exec();
+  }
 }

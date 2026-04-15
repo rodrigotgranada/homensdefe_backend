@@ -4,12 +4,14 @@ import { UsersService } from '../users/users.service';
 import { RegisterDto, ForgotPasswordDto, ResetPasswordDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
@@ -49,8 +51,7 @@ export class AuthService {
     const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await this.usersService.updateResetToken(String(user._id), token, expires);
 
-    // TODO: send email with token link when email service is configured
-    console.log(`🔑 Reset token for ${user.email}: ${token}`);
+    await this.mailService.sendResetPasswordEmail(user, token);
 
     return { message: 'Se o e-mail existir, você receberá um link de recuperação.' };
   }

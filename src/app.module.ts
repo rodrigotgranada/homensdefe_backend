@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { NewsModule } from './news/news.module';
 import { SettingsModule } from './settings/settings.module';
 import { EventsModule } from './events/events.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { EventsModule } from './events/events.module';
     NewsModule,
     SettingsModule,
     EventsModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
