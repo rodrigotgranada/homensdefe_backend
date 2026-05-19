@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type UserDocument = User & Document;
 
@@ -9,22 +9,31 @@ export class Telefone {
   numero: string;
 
   @Prop({ default: false })
-  isWhats: boolean;
+  isWhatsApp: boolean;
 
   @Prop({ default: false })
-  isPrimary: boolean;
+  isPrincipal: boolean;
 }
 
 @Schema({ _id: false })
-export class Saude {
+export class InformacoesSaude {
   @Prop({ default: false })
   temProblemaFisico: boolean;
 
   @Prop()
-  descricao: string;
+  descricaoProblema: string;
+
+  @Prop({ default: false })
+  temAlergia: boolean;
 
   @Prop()
-  alergias: string;
+  descricaoAlergia: string;
+
+  @Prop({ default: false })
+  temDietaEspecial: boolean;
+
+  @Prop()
+  descricaoDieta: string;
 }
 
 @Schema({ _id: false })
@@ -48,6 +57,39 @@ export class Lgpd {
   aceitouEm: Date;
 }
 
+@Schema({ _id: false })
+export class Endereco {
+  @Prop()
+  cep: string;
+
+  @Prop()
+  logradouro: string;
+
+  @Prop()
+  numero: string;
+
+  @Prop()
+  complemento: string;
+
+  @Prop()
+  bairro: string;
+
+  @Prop()
+  cidade: string;
+
+  @Prop()
+  uf: string;
+
+  @Prop()
+  referencia: string;
+
+  @Prop()
+  tipo: string;
+
+  @Prop({ default: false })
+  isPrincipal: boolean;
+}
+
 export enum UserRole {
   SUPER_ADM = 'SUPER_ADM',
   LOCAL_ADM = 'LOCAL_ADM',
@@ -59,10 +101,14 @@ export enum UserStatus {
   INACTIVE = 'INACTIVE',
   BLOCKED = 'BLOCKED',
   EXCLUDED = 'EXCLUDED',
+  PENDING = 'PENDING',
 }
 
 @Schema({ timestamps: true })
 export class User {
+  @Prop({ unique: true, sparse: true })
+  matricula: string;
+
   @Prop({ required: true })
   nome: string;
 
@@ -96,17 +142,23 @@ export class User {
   @Prop({ enum: UserRole, default: UserRole.USER })
   role: UserRole;
 
-  @Prop()
-  originCity: string;
+  @Prop({ type: Types.ObjectId, ref: 'City' })
+  cidadePreferida: Types.ObjectId;
 
-  @Prop({ type: Saude })
-  saude: Saude;
+  @Prop({ type: [Endereco], default: [] })
+  enderecos: Endereco[];
+
+  @Prop({ type: Types.ObjectId, ref: 'City' })
+  cidadeAdmin: Types.ObjectId;
+
+  @Prop({ type: InformacoesSaude })
+  saude: InformacoesSaude;
 
   @Prop({ type: ContatoEmergencia })
   contatoEmergencia: ContatoEmergencia;
 
   @Prop()
-  indicacao: string;
+  indicadoPor: string; // E-mail ou Celular
 
   @Prop()
   paroquia: string;
@@ -114,14 +166,41 @@ export class User {
   @Prop({ type: Lgpd })
   lgpd: Lgpd;
 
-  @Prop({ enum: UserStatus, default: UserStatus.ACTIVE })
+  @Prop({ enum: UserStatus, default: UserStatus.PENDING })
   status: UserStatus;
+
+  @Prop()
+  verificationCode: string;
+
+  @Prop()
+  verificationCodeExpires: Date;
+
+  @Prop()
+  lastVerificationCodeSentAt: Date;
 
   @Prop()
   lastLogin: Date;
 
+  @Prop({ default: false })
+  mustChangePassword: boolean;
+
   @Prop()
   resetPasswordToken: string;
+
+  @Prop()
+  lastResetPasswordCodeSentAt: Date;
+
+  @Prop()
+  pendingNewEmail: string;
+
+  @Prop()
+  emailChangeToken: string;
+
+  @Prop()
+  emailChangeExpires: Date;
+
+  @Prop()
+  lastEmailChangeCodeSentAt: Date;
 
   @Prop()
   resetPasswordExpires: Date;
@@ -131,15 +210,20 @@ export class User {
 
   @Prop()
   updatedBy: string;
+
+  @Prop()
+  reactivationCode: string;
+
+  @Prop()
+  reactivationCodeExpires: Date;
+
+  @Prop()
+  lastReactivationCodeSentAt: Date;
+
+  @Prop()
+  adminNotes: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-// Ensure that "EXCLUDED" users do not appear by default (soft delete logic can be added/extended via hooks if globally required)
-UserSchema.pre('find', function () {
-  this.where({ status: { $ne: UserStatus.EXCLUDED } });
-});
 
-UserSchema.pre('findOne', function () {
-  this.where({ status: { $ne: UserStatus.EXCLUDED } });
-});

@@ -22,14 +22,17 @@ export class FirebaseService implements OnModuleInit {
     // Handles the \n parsing inside Render strings securely
     const parsedPrivateKey = privateKey.replace(/\\n/g, '\n');
 
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId,
-        clientEmail,
-        privateKey: parsedPrivateKey,
-      }),
-      storageBucket: bucketName,
-    });
+    // Previne erro de inicialização duplicada no hot-reload
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId,
+          clientEmail,
+          privateKey: parsedPrivateKey,
+        }),
+        storageBucket: bucketName,
+      });
+    }
 
     this.bucket = admin.storage().bucket();
     console.log(`🔥 Firebase Admin connected on bucket: ${bucketName}`);
